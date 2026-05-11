@@ -72,14 +72,53 @@ body{background:var(--bg);color:var(--txt);font-family:var(--font-b);font-weight
 footer{background:var(--bg2);border-top:1px solid var(--line);padding:1.5rem 2.5rem;text-align:right}
 .foot-note{font-size:11px;color:var(--txt3);font-style:italic}
 @media(max-width:700px){
-  .hero{padding:1.5rem 1rem}
-  .t-row{grid-template-columns:1fr}
-  .t-left{border-right:none;border-bottom:1px solid var(--line);padding:1rem 0 .75rem}
-  .t-right{padding:1rem 0}
+  .nav{padding:0 .875rem;gap:.75rem}
+  .nav-logo{font-size:18px}
+  .nav-logo span{display:none}
+  .hero{padding:1.25rem 1rem}
+  .hero-h1{font-size:clamp(42px,11vw,68px)}
+  .day-strip{padding:.7rem 1rem}
+  .ds-name{font-size:28px}
   .ds-pills{display:none}
-  .timeline{padding:1.5rem 1rem 2.5rem}
-  .day-strip{padding-left:1rem;padding-right:1rem}
-  footer{padding:1.5rem 1rem}
+  .timeline{padding:1rem 1rem 2rem;max-width:100%}
+  .t-row{grid-template-columns:1fr}
+  .t-left{border-right:none;border-bottom:1px solid var(--line);padding:.9rem 0 .7rem}
+  .t-right{padding:.9rem 0}
+  .t-title{font-size:22px;margin-bottom:.9rem}
+  .ex-grid{grid-template-columns:1fr}
+  footer{padding:1.25rem 1rem}
+}
+@media(max-width:480px){
+  .nav{height:auto;min-height:44px;padding:.45rem .75rem;gap:.5rem}
+  .nav-logo{font-size:15px}
+  .tab{padding:4px 9px;font-size:9px;letter-spacing:.06em}
+  .hero{padding:.875rem .75rem}
+  .hero-h1{font-size:clamp(36px,12vw,52px);line-height:.92}
+  .hero-eyebrow{font-size:9px;letter-spacing:.1em}
+  .day-strip{padding:.6rem .75rem}
+  .ds-name{font-size:20px;letter-spacing:.03em}
+  .timeline{padding:.75rem .75rem 1.5rem}
+  .t-left{padding:.75rem 0 .6rem}
+  .t-time{font-size:17px}
+  .t-dur{font-size:10px}
+  .t-right{padding:.75rem 0}
+  .t-title{font-size:17px;margin-bottom:.7rem}
+  .t-plain{font-size:12.5px;padding:.7rem .9rem}
+  .sec{font-size:8.5px;padding-bottom:.45rem;margin:1.1rem 0 .65rem}
+  .ex-card{padding:.85rem .9rem}
+  .ex-name{font-size:19px}
+  .ex-top{flex-wrap:wrap;row-gap:4px}
+  .ex-sets{font-size:10.5px}
+  .yt-btn{font-size:8.5px;padding:3px 7px}
+  .yt-btn svg{width:10px;height:10px}
+  .cue-lbl{font-size:8px}
+  .cues li{font-size:12px;padding-left:12px}
+  .cues li::before{font-size:9px}
+  .rest{padding:4rem 1.5rem}
+  .rest-n{font-size:90px}
+  .rest-t{font-size:22px}
+  .rest-p{font-size:12.5px}
+  footer{padding:1rem .75rem;text-align:center}
 }
 </style>
 </head>
