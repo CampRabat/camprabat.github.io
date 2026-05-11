@@ -69,11 +69,11 @@ body{background:var(--bg);color:var(--txt);font-family:var(--font-b);font-weight
 .rest-n{font-family:var(--font-d);font-size:150px;color:var(--bg3);line-height:1}
 .rest-t{font-family:var(--font-d);font-size:34px;color:var(--txt3);letter-spacing:.06em}
 .rest-p{font-size:13.5px;color:var(--txt3);max-width:430px;line-height:1.8}
-.ex-thumb{display:block;margin-top:.85rem;border-radius:4px;overflow:hidden;position:relative;line-height:0;border:1px solid var(--line)}
-.ex-thumb img{width:100%;height:auto;display:block;opacity:.82;transition:opacity .15s}
-.ex-thumb:hover img{opacity:1}
-.thumb-yt{position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,.72);color:#fff;font-family:var(--font-m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;display:inline-flex;align-items:center;gap:4px}
-.thumb-yt svg{width:9px;height:9px;fill:currentColor;flex-shrink:0}
+.ex-imgs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:.85rem}
+.ex-img-wrap{position:relative;border-radius:4px;overflow:hidden;border:1px solid var(--line);line-height:0;background:var(--bg3)}
+.ex-img-wrap img{width:100%;height:auto;display:block;opacity:.88;transition:opacity .12s}
+.ex-img-wrap:hover img{opacity:1}
+.ex-img-lbl{position:absolute;bottom:5px;left:6px;background:rgba(0,0,0,.65);color:#fff;font-family:var(--font-m);font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px}
 footer{background:var(--bg2);border-top:1px solid var(--line);padding:1.5rem 2.5rem;text-align:right}
 .foot-note{font-size:11px;color:var(--txt3);font-style:italic}
 @media(max-width:700px){
@@ -902,20 +902,53 @@ function show(day) {
   if (idx !== undefined && tabs[idx]) tabs[idx].classList.add('active');
 }
 
+const B = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const W = 'https://upload.wikimedia.org/wikipedia/commons/';
+const imgMap = {
+  'mcgill perro-pájaro':           [W+'8/82/Bird_dog_exercise.jpg',                          W+'8/82/Bird_dog_exercise.jpg'],
+  'perro-pájaro mcgill suave':     [W+'8/82/Bird_dog_exercise.jpg',                          W+'8/82/Bird_dog_exercise.jpg'],
+  'bicho muerto':                   [B+'Dead_Bug/0.jpg',                                       B+'Dead_Bug/1.jpg'],
+  'press de pallof':                [B+'Pallof_Press/0.jpg',                                   B+'Pallof_Press/1.jpg'],
+  'almeja':                         [B+'Side_Lying_Groin_Stretch/0.jpg',                       B+'Thigh_Abductor/0.jpg'],
+  'almeja ligera':                  [B+'Side_Lying_Groin_Stretch/0.jpg',                       B+'Thigh_Abductor/0.jpg'],
+  'caminata lateral':               [B+'Monster_Walk/0.jpg',                                   B+'Monster_Walk/1.jpg'],
+  'elevaciones y-t-w':              [B+'Dumbbell_Lying_One-Arm_Rear_Lateral_Raise/0.jpg',      B+'Dumbbell_Lying_One-Arm_Rear_Lateral_Raise/1.jpg'],
+  'jalón facial':                   [B+'Face_Pull/0.jpg',                                      B+'Face_Pull/1.jpg'],
+  'jalón facial + rot. externa':    [B+'Face_Pull/0.jpg',                                      B+'Face_Pull/1.jpg'],
+  'curl nórdico':                   [B+'Platform_Hamstring_Slides/0.jpg',                      B+'Platform_Hamstring_Slides/1.jpg'],
+  'peso muerto a una pierna':       [B+'Romanian_Deadlift/0.jpg',                              B+'Romanian_Deadlift/1.jpg'],
+  'rodillo fascial sistémico':      [B+'Iliotibial_Tract-SMR/0.jpg',                           B+'Hamstring-SMR/0.jpg'],
+  'rodillo fascial profundo':       [B+'Iliotibial_Tract-SMR/0.jpg',                           B+'Hamstring-SMR/0.jpg'],
+  'rodillo fascial completo':       [B+'Iliotibial_Tract-SMR/0.jpg',                           B+'Hamstring-SMR/0.jpg'],
+  'isométricos cervicales':         [B+'Isometric_Neck_Exercise_-_Front_And_Back/0.jpg',       B+'Isometric_Neck_Exercise_-_Front_And_Back/1.jpg'],
+  'equilibrio a una pierna':        [B+'Balance_Board/0.jpg',                                  B+'Balance_Board/1.jpg'],
+  'extensión terminal de rodilla':  [B+'External_Rotation_with_Band/0.jpg',                    B+'External_Rotation_with_Band/1.jpg'],
+  'cubo de arroz':                  [B+'Finger_Curls/0.jpg',                                   B+'Finger_Curls/1.jpg'],
+  'extensiones de dedo':            [B+'Finger_Curls/0.jpg',                                   B+'Finger_Curls/1.jpg'],
+  'empuje de cadera':               [B+'Barbell_Hip_Thrust/0.jpg',                             B+'Barbell_Hip_Thrust/1.jpg'],
+  'empuje de cadera + sep. de banda':[B+'Barbell_Hip_Thrust/0.jpg',                            B+'Barbell_Hip_Thrust/1.jpg'],
+  'separación de banda':            [B+'Band_Pull_Apart/0.jpg',                                B+'Band_Pull_Apart/1.jpg'],
+  'rotación torácica 90/90':        [B+'Torso_Rotation/0.jpg',                                 B+'Torso_Rotation/1.jpg'],
+  'rot. articulares cadera y hombro':[B+'Hip_Circles_prone/0.jpg',                             B+'Hip_Circles_prone/1.jpg'],
+  'rot. articulares hombro y cadera':[B+'Hip_Circles_prone/0.jpg',                             B+'Hip_Circles_prone/1.jpg'],
+  'isométrico patelar':             [B+'Quadriceps-SMR/0.jpg',                                 B+'Quadriceps-SMR/1.jpg'],
+  'isométrico aquiles':             [B+'Standing_Calf_Raises/0.jpg',                           B+'Standing_Calf_Raises/1.jpg'],
+  'eversión de tobillo':            [B+'Peroneals-SMR/0.jpg',                                  B+'Peroneals-SMR/1.jpg'],
+  'estiramiento 90/90 de cadera':   [B+'90_90_Hamstring/0.jpg',                                B+'90_90_Hamstring/1.jpg'],
+};
+
 document.querySelectorAll('.ex-card').forEach(card => {
-  const link = card.querySelector('.yt-btn');
-  if (!link) return;
-  try {
-    const videoId = new URL(link.href).searchParams.get('v');
-    if (!videoId) return;
-    const thumb = document.createElement('a');
-    thumb.href = link.href;
-    thumb.target = '_blank';
-    thumb.className = 'ex-thumb';
-    thumb.innerHTML = '<img src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" alt="" loading="lazy">'
-      + '<span class="thumb-yt"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>Ver vídeo</span>';
-    card.appendChild(thumb);
-  } catch(e) {}
+  const nameEl = card.querySelector('.ex-name');
+  if (!nameEl) return;
+  const name = nameEl.textContent.trim().toLowerCase();
+  const imgs = imgMap[name];
+  if (!imgs) return;
+  const div = document.createElement('div');
+  div.className = 'ex-imgs';
+  div.innerHTML =
+    '<div class="ex-img-wrap"><img src="' + imgs[0] + '" alt="Inicio" loading="lazy"><span class="ex-img-lbl">Inicio</span></div>' +
+    '<div class="ex-img-wrap"><img src="' + imgs[1] + '" alt="Fin" loading="lazy"><span class="ex-img-lbl">Fin</span></div>';
+  card.appendChild(div);
 });
 </script>
 </body>
