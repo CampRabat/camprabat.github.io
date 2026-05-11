@@ -69,6 +69,11 @@ body{background:var(--bg);color:var(--txt);font-family:var(--font-b);font-weight
 .rest-n{font-family:var(--font-d);font-size:150px;color:var(--bg3);line-height:1}
 .rest-t{font-family:var(--font-d);font-size:34px;color:var(--txt3);letter-spacing:.06em}
 .rest-p{font-size:13.5px;color:var(--txt3);max-width:430px;line-height:1.8}
+.ex-thumb{display:block;margin-top:.85rem;border-radius:4px;overflow:hidden;position:relative;line-height:0;border:1px solid var(--line)}
+.ex-thumb img{width:100%;height:auto;display:block;opacity:.82;transition:opacity .15s}
+.ex-thumb:hover img{opacity:1}
+.thumb-yt{position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,.72);color:#fff;font-family:var(--font-m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;display:inline-flex;align-items:center;gap:4px}
+.thumb-yt svg{width:9px;height:9px;fill:currentColor;flex-shrink:0}
 footer{background:var(--bg2);border-top:1px solid var(--line);padding:1.5rem 2.5rem;text-align:right}
 .foot-note{font-size:11px;color:var(--txt3);font-style:italic}
 @media(max-width:700px){
@@ -896,6 +901,22 @@ function show(day) {
   const idx = map[day];
   if (idx !== undefined && tabs[idx]) tabs[idx].classList.add('active');
 }
+
+document.querySelectorAll('.ex-card').forEach(card => {
+  const link = card.querySelector('.yt-btn');
+  if (!link) return;
+  try {
+    const videoId = new URL(link.href).searchParams.get('v');
+    if (!videoId) return;
+    const thumb = document.createElement('a');
+    thumb.href = link.href;
+    thumb.target = '_blank';
+    thumb.className = 'ex-thumb';
+    thumb.innerHTML = '<img src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" alt="" loading="lazy">'
+      + '<span class="thumb-yt"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>Ver vídeo</span>';
+    card.appendChild(thumb);
+  } catch(e) {}
+});
 </script>
 </body>
 </html>
