@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MMA — Protocolo de Suplementación Prefight</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0c0c;--bg2:#141414;--bg3:#1c1c1c;--bg4:#252525;
+  --line:#282828;--line2:#363636;
+  --txt:#e9e5dd;--txt2:#9e9890;--txt3:#5c5852;
+  --red:#cf3b2e;--red-bg:#1c0907;
+  --gold:#c49838;--gold-bg:#1a1307;
+  --teal:#2d9070;--teal-bg:#071310;
+  --purple:#7c5cbf;--purple-bg:#140e1f;
+  --font-d:'Bebas Neue',sans-serif;
+  --font-b:'DM Sans',sans-serif;
+  --font-m:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-b);font-weight:300;line-height:1.65;font-size:15px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:200;background:var(--bg2);border-bottom:1px solid var(--line);height:52px;display:flex;align-items:center;padding:0 1.5rem;gap:1.5rem}
+.nav-logo{font-family:var(--font-d);font-size:22px;letter-spacing:.1em;color:var(--red);white-space:nowrap}
+.nav-logo span{color:var(--txt2)}
+.nav-tabs{display:flex;gap:4px;overflow-x:auto}
+.nav-tabs::-webkit-scrollbar{display:none}
+.ntab{font-family:var(--font-m);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:3px;border:1px solid var(--line2);background:transparent;color:var(--txt3);cursor:pointer;white-space:nowrap;transition:all .13s}
+.ntab:hover:not(.active){border-color:var(--txt3);color:var(--txt2)}
+.ntab.active{background:var(--red);border-color:var(--red);color:#fff}
+.ntab.fight{border-color:var(--gold);color:var(--gold)}
+.ntab.fight.active{background:var(--gold);border-color:var(--gold);color:var(--bg)}
+.ntab.info{border-color:var(--purple);color:var(--purple)}
+.ntab.info.active{background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* HERO */
+.hero{background:var(--bg2);border-bottom:3px solid var(--red);padding:2.5rem 2.5rem 2rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:end}
+.hero-eyebrow{font-family:var(--font-m);font-size:10px;letter-spacing:.15em;color:var(--red);margin-bottom:.6rem}
+.hero-h1{font-family:var(--font-d);font-size:clamp(44px,6vw,70px);line-height:.88;color:var(--txt);margin-bottom:1rem}
+.hero-h1 em{color:var(--red);font-style:normal}
+.hero-p{font-size:13.5px;color:var(--txt2);max-width:520px}
+.hero-stat{text-align:right}
+.hero-n{font-family:var(--font-d);font-size:90px;line-height:1;color:var(--bg4);display:block}
+.hero-nl{font-family:var(--font-m);font-size:9.5px;letter-spacing:.12em;color:var(--txt3)}
+
+/* VIEWS */
+.view{display:none}
+.view.active{display:block}
+
+/* WEEK HEADER */
+.week-header{background:var(--bg2);border-bottom:2px solid var(--line);padding:.8rem 2.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.wh-name{font-family:var(--font-d);font-size:34px;letter-spacing:.04em;color:var(--txt)}
+.wh-sub{font-size:13px;color:var(--txt3);font-style:italic}
+.wh-pills{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.wpill{font-family:var(--font-m);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:2px}
+.wpill.r{background:var(--red-bg);color:var(--red)}
+.wpill.g{background:var(--gold-bg);color:var(--gold)}
+.wpill.t{background:var(--teal-bg);color:var(--teal)}
+.wpill.n{background:var(--bg4);color:var(--txt3)}
+
+/* DAY TABS */
+.day-nav{display:flex;border-bottom:1px solid var(--line);background:var(--bg2);overflow-x:auto}
+.day-nav::-webkit-scrollbar{display:none}
+.dtab{font-family:var(--font-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:none;background:transparent;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .13s}
+.dtab:hover:not(.dactive){color:var(--txt2)}
+.dtab.dactive{color:var(--txt);border-bottom-color:var(--red)}
+.dtab.sparring-day{color:var(--gold)}
+.dtab.sparring-day.dactive{border-bottom-color:var(--gold)}
+
+/* DAY CONTENT */
+.day-content{display:none}
+.day-content.dactive{display:block}
+.main{max-width:1000px;margin:0 auto;padding:1.75rem 2rem 3rem}
+
+/* TIMING BLOCK */
+.t-block{margin-bottom:1.75rem}
+.t-label{font-family:var(--font-m);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);padding-bottom:.55rem;border-bottom:1px solid var(--line);margin-bottom:.9rem;display:flex;align-items:center;gap:8px}
+.t-label-time{font-family:var(--font-d);font-size:18px;color:var(--txt);letter-spacing:.04em}
+.t-label-type{font-family:var(--font-m);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase}
+.t-label-type.prev{color:var(--red)}
+.t-label-type.rec{color:var(--teal)}
+.t-label-type.sess{color:var(--txt3)}
+.t-label-type.warn{color:var(--gold)}
+
+/* SUPP GRID */
+.s-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:.5rem}
+.s-card{background:var(--bg2);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.4rem;transition:background .12s}
+.s-card:hover{background:var(--bg3)}
+.s-card.paused{opacity:.35}
+.s-card.hl{background:#071310}
+.s-card.hl:hover{background:#0a1a14}
+.s-tag{display:inline-block;font-family:var(--font-m);font-size:9px;letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-bottom:1px}
+.s-tag.ok{background:var(--bg4);color:var(--txt3)}
+.s-tag.pause{background:var(--red-bg);color:var(--red)}
+.s-tag.up{background:var(--teal-bg);color:var(--teal)}
+.s-tag.warn{background:var(--gold-bg);color:var(--gold)}
+.s-tag.new{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal)}
+.s-name{font-family:var(--font-d);font-size:20px;letter-spacing:.02em;color:var(--txt);line-height:1}
+.s-card.paused .s-name{color:var(--txt3)}
+.s-units{font-family:var(--font-m);font-size:11.5px;color:var(--gold);letter-spacing:.04em}
+.s-card.paused .s-units{color:var(--txt3)}
+.s-note{font-size:11.5px;color:var(--txt3);font-weight:300;line-height:1.5}
+
+/* ALERTS */
+.alert{border-radius:4px;padding:.85rem 1.1rem;font-size:13px;font-weight:300;line-height:1.7;margin-bottom:1.25rem}
+.alert strong{font-weight:500}
+.alert.danger{background:var(--red-bg);border-left:3px solid var(--red);color:#d47070}
+.alert.ok{background:var(--teal-bg);border-left:3px solid var(--teal);color:#68b9a5}
+.alert.warn{background:var(--gold-bg);border-left:3px solid var(--gold);color:#c29548}
+
+/* SESSION BOX */
+.sess-box{background:var(--bg3);border-radius:4px;padding:.85rem 1.1rem;font-size:13.5px;color:var(--txt3);font-style:italic;margin-bottom:.5rem}
+
+/* INFO CARDS */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.info-card{background:var(--bg2);padding:1.25rem 1.2rem;display:flex;flex-direction:column;gap:.6rem}
+.info-num{font-family:var(--font-d);font-size:44px;color:var(--bg4);line-height:1}
+.info-name{font-family:var(--font-d);font-size:22px;letter-spacing:.02em;color:var(--txt)}
+.info-for{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:2px}
+.info-body{font-size:13px;color:var(--txt2);line-height:1.65;font-weight:300}
+.info-dose{font-family:var(--font-m);font-size:11px;color:var(--gold);padding-top:.55rem;border-top:1px solid var(--line);margin-top:2px}
+.info-when{font-size:11px;color:var(--txt3);font-style:italic}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--line);padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+.foot-refs{font-size:11px;color:var(--txt3);line-height:1.9;font-family:var(--font-m)}
+.foot-refs strong{color:var(--txt2)}
+.foot-note{font-size:11px;color:var(--txt3);text-align:right;font-style:italic}
+
+@media(max-width:680px){
+  .nav{padding:0 .875rem;gap:.75rem}
+  .nav-logo{font-size:18px}
+  .nav-logo span{display:none}
+  .hero{grid-template-columns:1fr;padding:1.25rem 1rem 1rem}
+  .hero-stat{display:none}
+  .hero-h1{font-size:clamp(40px,11vw,64px)}
+  .week-header{padding:.7rem 1rem}
+  .wh-name{font-size:26px}
+  .wh-sub{font-size:12px}
+  .wh-pills{display:none}
+  .day-nav{padding:0}
+  .dtab{padding:9px 12px;font-size:9.5px}
+  .main{padding:1rem 1rem 2rem}
+  .s-grid{grid-template-columns:1fr}
+  .info-grid{grid-template-columns:1fr}
+  footer{flex-direction:column;padding:1.25rem 1rem}
+  .foot-note{text-align:left}
+}
+@media(max-width:480px){
+  .nav{height:auto;min-height:44px;padding:.45rem .75rem;gap:.5rem}
+  .nav-logo{font-size:15px}
+  .ntab{padding:4px 9px;font-size:9px;letter-spacing:.06em}
+  .hero{padding:.875rem .75rem .875rem}
+  .hero-eyebrow{font-size:9px;letter-spacing:.1em}
+  .hero-h1{font-size:clamp(34px,12vw,50px);line-height:.92}
+  .hero-p{font-size:12.5px}
+  .week-header{padding:.6rem .75rem;gap:.6rem}
+  .wh-name{font-size:20px;letter-spacing:.03em}
+  .dtab{padding:8px 10px;font-size:9px}
+  .main{padding:.75rem .75rem 1.5rem}
+  .t-label{font-size:8.5px;gap:6px}
+  .t-label-time{font-size:15px}
+  .t-label-type{font-size:8.5px}
+  .s-card{padding:.85rem .9rem}
+  .s-name{font-size:17px}
+  .s-units{font-size:10.5px}
+  .s-note{font-size:11px}
+  .s-tag{font-size:8px;padding:2px 5px}
+  .alert{font-size:12.5px;padding:.7rem .9rem}
+  .sess-box{font-size:12.5px;padding:.7rem .9rem}
+  .info-card{padding:.9rem 1rem}
+  .info-num{font-size:32px}
+  .info-name{font-size:18px}
+  .info-body{font-size:12px}
+  .info-dose,.info-when{font-size:10px}
+  footer{padding:1rem .75rem}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-logo">MMA <span>Suplementación</span></div>
+  <div class="nav-tabs">
+    <button class="ntab active" onclick="showView('s4')">Semana 4</button>
+    <button class="ntab" onclick="showView('s3')">Semana 3</button>
+    <button class="ntab" onclick="showView('s2')">Semana 2</button>
+    <button class="ntab fight" onclick="showView('fw')">Fight Week</button>
+    <button class="ntab info" onclick="showView('info')">¿Para qué sirve cada uno?</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="hero-eyebrow">Protocolo de suplementación · 72 kg · Corte hasta 63 kg · Más de 24h entre pesaje y combate</div>
+    <h1 class="hero-h1">PROTOCOLO DE<br><em>SUPLEMENTACIÓN</em></h1>
+    <p class="hero-p">Programación diaria exacta de suplementación. Cada producto con el número exacto de píldoras o gramos de polvo. Basado en evidencia científica y datos verificados de Solgar.</p>
+  </div>
+  <div class="hero-stat">
+    <span class="hero-n">13</span>
+    <span class="hero-nl">Suplementos<br>en el stack</span>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SEMANA 4 ════════════════════ -->
+<div id="view-s4" class="view active">
+  <div class="week-header" style="border-bottom-color:var(--red)">
+    <div class="wh-name">Semana 4</div>
+    <div class="wh-sub">Días 1–7 · Stack completo · Creatina activa desde el martes</div>
+    <div class="wh-pills">
+      <span class="wpill g">Creatina: ACTIVA</span>
+      <span class="wpill n">Stack completo · sin modificaciones</span>
+    </div>
+  </div>
+
+  <div class="day-nav">
+    <button class="dtab" onclick="showDay('s4','lun')">LUN</button>
+    <button class="dtab dactive" onclick="showDay('s4','mar')">MAR · HOY</button>
+    <button class="dtab sparring-day" onclick="showDay('s4','mie')">MIÉ · Sparring</button>
+    <button class="dtab" onclick="showDay('s4','jue')">JUE</button>
+    <button class="dtab" onclick="showDay('s4','vie')">VIE</button>
+    <button class="dtab sparring-day" onclick="showDay('s4','sab')">SÁB · Sparring</button>
+    <button class="dtab" onclick="showDay('s4','dom')">DOM · Descanso</button>
+  </div>
+
+  <!-- S4 LUN — protocolo igual que MAR pero sin creatina (empezó martes) -->
+  <div id="s4-lun" class="day-content">
+    <div class="main">
+      <div class="alert warn"><strong>Lunes — ya pasado.</strong> Mismo protocolo que el martes pero sin creatina (todavía no la había empezado).</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana · con el desayuno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div><div class="s-note">400 mg Vit C incluida</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h · 30 min antes</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Post-entreno — ventana de recuperación intestinal y muscular</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">18:30</span><span class="t-label-type prev">Pre-entreno 19h · 30 min antes</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div><div class="s-note">Segunda sesión del día</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche · 45–60 min antes de dormir</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 MAR — HOY -->
+  <div id="s4-mar" class="day-content dactive">
+    <div class="main">
+      <div class="alert ok"><strong>Hoy · Martes · Semana 4 · La creatina empieza hoy.</strong> Sin fase de carga — 5g/día directo es suficiente. El músculo la irá saturando progresivamente durante semana 4 y 2. Se corta el lunes de fight week (15 días antes del pesaje).</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana · con el desayuno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div><div class="s-note">400 mg Vit C incluida · multivitamínico de base</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">EMPIEZA HOY</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Con la comida más rica en carbohidratos del día. Sin fase de carga.</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h · 30 min antes</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div><div class="s-note">Tomar todas juntas pre-11h</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Post-entreno — recuperación intestinal y muscular</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">18:30</span><span class="t-label-type prev">Pre-entreno 19h · 30 min antes</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div><div class="s-note">Segunda sesión del día</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche · 45–60 min antes de dormir</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 MIE SPARRING -->
+  <div id="s4-mie" class="day-content">
+    <div class="main">
+      <div class="alert warn"><strong>Sparring · Día de mayor riesgo de lesión.</strong> Protocolo pre-sparring obligatorio. Semana 4: el sparring puede ser intenso pero controlado. Sin ego-sparring.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag ok">Activa</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Con el desayuno — comida más rica en carbohidratos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type warn">Pre-sparring · OBLIGATORIO</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Prioritario</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div><div class="s-note">Osmoregulación antes del sparring</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin sparring</span><span class="t-label-type rec">Post-sparring</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Especialmente importante post-sparring — estrés intestinal alto</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 JUE VIE — mismo protocolo que MAR -->
+  <div id="s4-jue" class="day-content">
+    <div class="main">
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag ok">Activa</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 5g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">18:30</span><span class="t-label-type prev">Pre-entreno 19h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="s4-vie" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Viernes — mismo protocolo que el jueves.</strong> Stack completo. Creatina activa. Preparación para el sparring del sábado — no modificar nada.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag ok">Activa</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 5g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">18:30</span><span class="t-label-type prev">Pre-entreno 19h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 SAB SPARRING -->
+  <div id="s4-sab" class="day-content">
+    <div class="main">
+      <div class="alert warn"><strong>Sparring sábado · Semana 4 · Segundo día de mayor riesgo.</strong> Mismo protocolo pre-sparring que el miércoles. Post-sparring: recuperación máxima — entrada al descanso del domingo.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag ok">Activa</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type warn">Pre-sparring · OBLIGATORIO</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Prioritario</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin sparring</span><span class="t-label-type rec">Post-sparring · recuperación máxima</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 5g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 DOM -->
+  <div id="s4-dom" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Descanso total · Domingo.</strong> Sin entrenamiento. Sin suplementos salvo el stack nocturno. Hidratación sostenida, proteína alta, dormir 9h si es posible.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche · único momento del día</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ SEMANA 3 ════════════════════ -->
+<div id="view-s3" class="view">
+  <div class="week-header" style="border-bottom-color:var(--red)">
+    <div class="wh-name">Semana 3</div>
+    <div class="wh-sub">Días 1–7 · Último sparring duro · Creatina activa · Glutamina baja a 3g</div>
+    <div class="wh-pills">
+      <span class="wpill r">CREATINA: EMPIEZA DÍA 1</span>
+      <span class="wpill n">Se corta al inicio de fight week (15 días)</span>
+    </div>
+  </div>
+
+  <div class="day-nav" id="daynav-s3">
+    <button class="dtab dactive" onclick="showDay('s3','lun')">LUN</button>
+    <button class="dtab" onclick="showDay('s3','mar')">MAR</button>
+    <button class="dtab sparring-day" onclick="showDay('s3','mie')">MIÉ · Sparring</button>
+    <button class="dtab" onclick="showDay('s3','jue')">JUE</button>
+    <button class="dtab" onclick="showDay('s3','vie')">VIE</button>
+    <button class="dtab sparring-day" onclick="showDay('s3','sab')">SÁB · Sparring</button>
+    <button class="dtab" onclick="showDay('s3','dom')">DOM · Descanso</button>
+  </div>
+
+  <!-- S3 LUN -->
+  <div id="s3-lun" class="day-content dactive">
+    <div class="main">
+      <div class="alert ok"><strong>Lunes de semana 3 — creatina activa, glutamina baja a 3g.</strong></strong> El músculo no está saturado — 5g/día durante las semanas 3 y 2 darán un nivel funcional que mejora la potencia anaeróbica en las últimas semanas de camp. Se cortará al inicio de fight week (15 días antes del pesaje, que es lo que le funciona a este atleta).</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana · con el desayuno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div><div class="s-note">Multivitamínico base · 400 mg Vit C incluida</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">EMPIEZA HOY</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Sin fase de carga — 5g/día directo. Se corta al inicio de fight week.</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h · 30 min antes</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div><div class="s-note">Tomar todas juntas pre-11h</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 3g</div><div class="s-note">Baja de 5g a 3g esta semana</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche · 45–60 min antes de dormir</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div><div class="s-note">Disolver en agua o zumo</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 MAR -->
+  <div id="s3-mar" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Mismo protocolo que el lunes.</strong> Creatina activa, glutamina 3g.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag ok">Activa</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Continuar hasta el lunes de fight week</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 3g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 MIE SPARRING -->
+  <div id="s3-mie" class="day-content">
+    <div class="main">
+      <div class="alert warn"><strong>Día de sparring · Último sparring de alta intensidad del camp.</strong> A partir de la segunda mitad de esta sesión, bajar a técnico. El protocolo pre-sparring es obligatorio.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">Creatina Creapure</div><div class="s-units">—</div><div class="s-note">Se corta el lunes de fight week — 15 días antes del pesaje</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type warn">Pre-sparring · OBLIGATORIO</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Prioritario</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div><div class="s-note">Osmoregulación antes del esfuerzo</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin sparring</span><span class="t-label-type rec">Post-sparring · Recuperación</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 3g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 JUE -->
+  <div id="s3-jue" class="day-content">
+    <div class="main">
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">Creatina Creapure</div><div class="s-units">—</div><div class="s-note">Se corta el lunes de fight week — 15 días antes del pesaje</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 3g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 VIE -->
+  <div id="s3-vie" class="day-content">
+    <div class="main">
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">Creatina Creapure</div><div class="s-units">—</div><div class="s-note">Se corta el lunes de fight week — 15 días antes del pesaje</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 3g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 SAB SPARRING -->
+  <div id="s3-sab" class="day-content">
+    <div class="main">
+      <div class="alert warn"><strong>Sparring técnico únicamente.</strong> El sparring duro terminó el miércoles. Hoy: velocidad al 60–70%, sin potencia real, sin derribos con impacto. El coach supervisa.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type warn">Pre-sparring · OBLIGATORIO</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Prioritario</span><div class="s-name">Taurine</div><div class="s-units">6 cápsulas → 3.000 mg (3g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin sparring</span><span class="t-label-type rec">Post-sparring · Recuperación máxima · entrada al descanso del domingo</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Glutamine</div><div class="s-units">1 medida polvo → 3g</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 DOM -->
+  <div id="s3-dom" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Descanso total.</strong> Sin entrenamiento. Sin suplementos salvo el stack nocturno de sueño y recuperación. Hidratación sostenida, proteína alta, dormir 9h si es posible.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche · único momento del día</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">4 cápsulas → 480 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ SEMANA 2 ════════════════════ -->
+<div id="view-s2" class="view">
+  <div class="week-header" style="border-bottom-color:var(--gold)">
+    <div class="wh-name">Semana 2</div>
+    <div class="wh-sub">Días 8–14 · Taper + corte dietético · Solo sparring técnico</div>
+    <div class="wh-pills">
+      <span class="wpill r">Glutamina: PAUSAR</span>
+      <span class="wpill g">Taurina: subir a 4g</span>
+      <span class="wpill n">Male Multiple: pausar días 5–7</span>
+    </div>
+  </div>
+
+  <div class="day-nav" id="daynav-s2">
+    <button class="dtab dactive" onclick="showDay('s2','lun')">LUN</button>
+    <button class="dtab" onclick="showDay('s2','mar')">MAR</button>
+    <button class="dtab sparring-day" onclick="showDay('s2','mie')">MIÉ · Sparring</button>
+    <button class="dtab" onclick="showDay('s2','jue')">JUE</button>
+    <button class="dtab" onclick="showDay('s2','vie')">VIE</button>
+    <button class="dtab sparring-day" onclick="showDay('s2','sab')">SÁB · Sparring</button>
+    <button class="dtab" onclick="showDay('s2','dom')">DOM · Descanso</button>
+  </div>
+
+  <!-- S2 LUN -->
+  <div id="s2-lun" class="day-content dactive">
+    <div class="main">
+      <div class="alert warn"><strong>Inicio del taper y el corte dietético.</strong> Calorías y carbohidratos empiezan a bajar. La taurina sube a 4g para compensar el mayor estrés celular.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div><div class="s-note">El cortisol sube con la restricción calórica</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">Creatina Creapure</div><div class="s-units">—</div><div class="s-note">Se corta el lunes de fight week — 15 días antes del pesaje</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Subir dosis</span><div class="s-name">Taurine</div><div class="s-units">8 cápsulas → 4.000 mg (4g)</div><div class="s-note">Deshidratación progresiva — máxima osmoregulación</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">L-Glutamine</div><div class="s-units">—</div><div class="s-note">Aporta calorías — interfiere con el corte</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div><div class="s-note">Reducir para evitar efecto laxante en corte</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div><div class="s-note">Mantener efecto sueño con menos calorías</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 MAR -->
+  <div id="s2-mar" class="day-content">
+    <div class="main">
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Dosis alta</span><div class="s-name">Taurine</div><div class="s-units">8 cápsulas → 4.000 mg (4g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">L-Glutamine</div><div class="s-units">—</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 MIE SPARRING -->
+  <div id="s2-mie" class="day-content">
+    <div class="main">
+      <div class="alert danger"><strong>Sparring solo técnico · velocidad 60%.</strong> Sin contacto duro. Sin potencia en los golpes. El coach garantiza esto activamente.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type warn">Pre-sparring</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Dosis alta</span><div class="s-name">Taurine</div><div class="s-units">8 cápsulas → 4.000 mg (4g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · síntesis de colágeno durante el entreno</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin sparring</span><span class="t-label-type rec">Post-sparring</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 JUE -->
+  <div id="s2-jue" class="day-content">
+    <div class="main">
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Dosis alta</span><div class="s-name">Taurine</div><div class="s-units">8 cápsulas → 4.000 mg (4g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">L-Glutamine</div><div class="s-units">—</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 VIE -->
+  <div id="s2-vie" class="day-content">
+    <div class="main">
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Pausar mañana (día 5)</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas · hoy es el último día</div><div class="s-note">Los días 5–7 (viernes–domingo) se pausa el Male Multiple</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type prev">Pre-entreno 11h</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Dosis alta</span><div class="s-name">Taurine</div><div class="s-units">8 cápsulas → 4.000 mg (4g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Vitamina C 500 mg</div><div class="s-units">1 cápsula → 500 mg</div><div class="s-note">Con la taurina · activa la síntesis de colágeno durante el entreno</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Colágeno Hidrolizado</div><div class="s-units">1 medida polvo → 15g</div><div class="s-note">Con la vitamina C · en agua o zumo frío · protege tendones y ligamentos</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin 11h</span><span class="t-label-type rec">Post-entreno</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 SAB SPARRING -->
+  <div id="s2-sab" class="day-content">
+    <div class="main">
+      <div class="alert danger"><strong>Solo sombra o pads.</strong> Si hay sparring con compañero, velocidad al 50% máximo y sin contacto en cabeza. El Male Multiple se pausa desde hoy.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card paused"><span class="s-tag pause">PAUSADO</span><div class="s-name">Male Multiple</div><div class="s-units">—</div><div class="s-note">Días 6 y 7 pausado — puede interferir con la diuresis del corte</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">10:30</span><span class="t-label-type warn">Pre-sesión</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Dosis alta</span><div class="s-name">Taurine</div><div class="s-units">8 cápsulas → 4.000 mg (4g)</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Fin sesión</span><span class="t-label-type rec">Post · recuperación máxima · entrada al domingo</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Ashwagandha</div><div class="s-units">1 cápsula → 400 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag warn">Reducir</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Segunda toma · con la cena · completar los 3.2g diarios</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 DOM -->
+  <div id="s2-dom" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Descanso total · último domingo antes de fight week.</strong> Solo el stack de sueño. El corte dietético continúa. Hidratación sostenida.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche · único momento del día</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Magnesium</div><div class="s-units">2 cápsulas → 240 mg elemental</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ FIGHT WEEK ════════════════════ -->
+<div id="view-fw" class="view">
+  <div class="week-header" style="border-bottom-color:var(--gold)">
+    <div class="wh-name">Fight Week</div>
+    <div class="wh-sub">Días 15–21 · Carga de agua · Corte activo · Pesaje · Combate</div>
+    <div class="wh-pills">
+      <span class="wpill r">Stack al mínimo</span>
+      <span class="wpill g">Taurina: prioritaria</span>
+    </div>
+  </div>
+
+  <div class="day-nav" id="daynav-fw">
+    <button class="dtab dactive" onclick="showDay('fw','lun')">LUN · Carga agua</button>
+    <button class="dtab" onclick="showDay('fw','mar')">MAR · Carga agua</button>
+    <button class="dtab" onclick="showDay('fw','mie')">MIÉ · Carga agua</button>
+    <button class="dtab sparring-day" onclick="showDay('fw','jue')">JUE · Descarga</button>
+    <button class="dtab sparring-day" onclick="showDay('fw','vie')">VIE · Descarga</button>
+    <button class="dtab sparring-day" onclick="showDay('fw','pesaje')">PESAJE</button>
+    <button class="dtab" onclick="showDay('fw','post')">POST-PESAJE</button>
+    <button class="dtab" onclick="showDay('fw','noche')">NOCHE ANTES</button>
+    <button class="dtab" onclick="showDay('fw','combate')">DÍA COMBATE</button>
+  </div>
+
+  <!-- FW LUN-MIE CARGA -->
+  <div id="fw-lun" class="day-content dactive">
+    <div class="main">
+      <div class="alert warn"><strong>Fase de carga de agua · Lunes, martes y miércoles.</strong> El atleta bebe más agua de lo normal deliberadamente para tener más que eliminar durante la descarga. Sales minerales completas con sodio para facilitar la retención.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">07:00</span><span class="t-label-type prev">Mañana</span></div>
+        <div class="s-grid">
+          <div class="s-card paused"><span class="s-tag pause">PAUSADO</span><div class="s-name">Male Multiple</div><div class="s-units">—</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin K2 MK-7</div><div class="s-units">1 cápsula → 100 mcg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg · pausar jueves</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">Ashwagandha</div><div class="s-units">—</div><div class="s-note">Posible efecto sedante en fight week</div></div>
+          <div class="s-card hl"><span class="s-tag new">NUEVO</span><div class="s-name">Beta-Alanina</div><div class="s-units">polvo → 1.6g</div><div class="s-note">Primera toma del día · con el desayuno · el picor es normal y pasa en 20 min</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Mañana y tarde</span><span class="t-label-type prev">Taurina · 2 tomas separadas</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">4g/día · 2 tomas</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas (mañana) + 4 cápsulas (tarde) → 4.000 mg total</div><div class="s-note">Osmoregulación durante la carga de agua</div></div>
+          <div class="s-card"><span class="s-tag ok">Con agua</span><div class="s-name">Sales Minerales</div><div class="s-units">Dosis completa del producto · CON SODIO</div><div class="s-note">El sodio ayuda a retener el agua en la fase de carga</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div><div class="s-note">Sueño — el estrés psicológico de fight week es máximo</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADO</span><div class="s-name">Omega-3</div><div class="s-units">—</div><div class="s-note">Pausar 3–5 días antes del combate · leve efecto anticoagulante</div></div>
+          <div class="s-card paused"><span class="s-tag pause">PAUSADA</span><div class="s-name">Creatina Creapure</div><div class="s-units">—</div><div class="s-note">Se corta el lunes de fight week — 15 días antes del pesaje</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fw-mar" class="day-content">
+    <div class="main"><div class="alert ok"><strong>Martes · Fase de carga · Mismo protocolo que el lunes.</strong> Ver pestaña LUN para el detalle completo.</div></div>
+  </div>
+  <div id="fw-mie" class="day-content">
+    <div class="main"><div class="alert ok"><strong>Miércoles · Fase de carga · Mismo protocolo que el lunes.</strong> Ver pestaña LUN para el detalle completo.</div></div>
+  </div>
+
+  <!-- FW JUE-VIE DESCARGA -->
+  <div id="fw-jue" class="day-content">
+    <div class="main">
+      <div class="alert danger"><strong>Fase de descarga activa · Jueves y viernes (48h antes del pesaje).</strong> Stack al mínimo absoluto. Solo lo que protege la célula durante la deshidratación severa.</div>
+      <div class="alert danger"><strong>Señales de alerta — parar y rehidratar:</strong> orina marrón oscuro (no amarillo) · calambres espontáneos sin movimiento · visión borrosa o mareos al ponerse de pie · pulso >90 lpm tumbado · confusión mental.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Todo el día</span><span class="t-label-type warn">Stack de descarga · Mínimo absoluto</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Prioritaria</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg (2g)</div><div class="s-note">Proteger las células musculares durante la deshidratación severa</div></div>
+          <div class="s-card"><span class="s-tag warn">Solo K y Mg · SIN sodio</span><div class="s-name">Sales Minerales</div><div class="s-units">Potasio y magnesio únicamente</div><div class="s-note">Sin sodio — el sodio retendría agua. Solo K y Mg facilitan la diuresis</div></div>
+          <div class="s-card"><span class="s-tag warn">Solo si calambres</span><div class="s-name">Magnesium</div><div class="s-units">1 cápsula → 120 mg elemental</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Noche más difícil del corte</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">L-Theanine</div><div class="s-units">1 cápsula → 150 mg</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">media cucharadita polvo → 3g</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fw-vie" class="day-content">
+    <div class="main"><div class="alert danger"><strong>Viernes · Descarga activa · Mismo protocolo que el jueves.</strong> Ver pestaña JUE para el detalle completo. Mañana es el pesaje.</div></div>
+  </div>
+
+  <!-- PESAJE -->
+  <div id="fw-pesaje" class="day-content">
+    <div class="main">
+      <div class="alert danger"><strong>Día del pesaje.</strong> Antes del pesaje: solo taurina si queda algo de protocolo. El objetivo es llegar al peso. Después del pesaje empieza el protocolo de rehidratación.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Pre-pesaje</span><span class="t-label-type warn">Solo taurina si aplica</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag ok">Si aplica</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg</div><div class="s-note">Solo si aún faltan horas para el pesaje</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST-PESAJE -->
+  <div id="fw-post" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Post-pesaje · El orden de reintroducción es crítico.</strong> Primero sodio + agua, después creatina con carbohidratos. Sin sodio primero, el agua no se absorbe y se excreta.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Minutos 0–30</span><span class="t-label-type rec">Inmediatamente tras el pesaje</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag new">PRIORIDAD 1</span><div class="s-name">Sales Minerales</div><div class="s-units">Dosis completa · CON SODIO</div><div class="s-note">Lo primero. Sin sodio el agua no se absorbe correctamente.</div></div>
+          <div class="s-card hl"><span class="s-tag new">Reintroducir</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Con carbohidratos simples (zumo, arroz, plátano). La insulina maximiza la captación.</div></div>
+          <div class="s-card hl"><span class="s-tag up">Mantener</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg (2g)</div><div class="s-note">Sinergia con los electrolitos — distribuye el agua al interior de la célula</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Horas 1–6</span><span class="t-label-type rec">Rehidratación activa</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg (2g) · con comidas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g · con comida principal</div><div class="s-note">El tejido conectivo también se rehidrata</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Horas 6–24</span><span class="t-label-type rec">Hasta el combate · Reintroducción completa</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag new">Reintroducir</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas · con comida</div><div class="s-note">Reponer micronutrientes agotados en el corte</div></div>
+          <div class="s-card hl"><span class="s-tag new">Reintroducir</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div><div class="s-note">Antiinflamatorio pre-combate</div></div>
+          <div class="s-card hl"><span class="s-tag new">Reintroducir</span><div class="s-name">Zinc Picolinate</div><div class="s-units">1 tableta → 22 mg</div><div class="s-note">Se pierde masivamente en el sudor del corte</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg (2g) · con comidas</div></div>
+          <div class="s-card paused"><span class="s-tag pause">NO reintroducir</span><div class="s-name">Ashwagandha</div><div class="s-units">—</div><div class="s-note">Posible efecto sedante — no el día antes del combate</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOCHE ANTES -->
+  <div id="fw-noche" class="day-content">
+    <div class="main">
+      <div class="alert warn"><strong>Noche antes del combate · Stack de sueño máximo.</strong> La activación nerviosa pre-combate retrasa el sueño profundo. Este stack lo contrarresta sin sedar ni crear dependencia.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">22:00</span><span class="t-label-type rec">Stack de sueño · dosis máximas seguras</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Dosis alta · segura</span><div class="s-name">L-Theanine</div><div class="s-units">3 cápsulas → 450 mg</div><div class="s-note">Activa receptores GABA reduciendo la activación simpática nocturna. Sin efecto de resaca.</div></div>
+          <div class="s-card hl"><span class="s-tag up">Dosis alta</span><div class="s-name">Magnesium</div><div class="s-units">3 cápsulas → 360 mg elemental</div><div class="s-note">Regula el NMDA y la función muscular durante el sueño</div></div>
+          <div class="s-card hl"><span class="s-tag up">Dosis completa</span><div class="s-name">Glicina</div><div class="s-units">1 cucharadita polvo → 5g</div><div class="s-note">Baja la temperatura corporal central — señal fisiológica de sueño profundo</div></div>
+        </div>
+      </div>
+      <div class="alert ok" style="margin-top:1rem"><strong>Más allá de los suplementos:</strong> temperatura habitación 18–19°C · sin pantallas 60 min antes · sin cafeína después de las 14h · habitación completamente a oscuras. Estos factores tienen el mismo o mayor impacto que los suplementos.</div>
+    </div>
+  </div>
+
+  <!-- DÍA COMBATE -->
+  <div id="fw-combate" class="day-content">
+    <div class="main">
+      <div class="alert ok"><strong>Día del combate · Protocolo de vestuario.</strong> Estos dos protocolos deben hacerse en el vestuario, 15–20 min antes de salir al ring.</div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Mañana · con el desayuno</span><span class="t-label-type prev">Suplementación base del día</span></div>
+        <div class="s-grid">
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Male Multiple</div><div class="s-units">3 tabletas</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Vitamin D3</div><div class="s-units">2 softgels → 2.000 UI</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Omega-3</div><div class="s-units">2 softgels → 1.008 mg EPA + 756 mg DHA</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg (2g)</div></div>
+          <div class="s-card hl"><span class="s-tag ok">Mantener</span><div class="s-name">Creatina Creapure</div><div class="s-units">1 medida polvo → 5g</div><div class="s-note">Con carbohidratos del desayuno</div></div>
+        </div>
+      </div>
+      <div class="t-block">
+        <div class="t-label"><span class="t-label-time">Vestuario · 15–20 min pre-salida</span><span class="t-label-type warn">Protocolo de activación pre-pelea</span></div>
+        <div class="s-grid">
+          <div class="s-card hl"><span class="s-tag up">Obligatorio</span><div class="s-name">Taurine</div><div class="s-units">4 cápsulas → 2.000 mg (2g)</div><div class="s-note">Última carga de osmoregulación antes de los rounds</div></div>
+          <div class="s-card"><span class="s-tag ok">Mantener</span><div class="s-name">Sales Minerales</div><div class="s-units">Dosis del producto con agua</div><div class="s-note">Electrolitos completos antes del esfuerzo</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ INFO: PARA QUÉ SIRVE CADA UNO ════════════════════ -->
+<div id="view-info" class="view">
+  <div class="week-header" style="border-bottom-color:var(--purple)">
+    <div class="wh-name">¿Para qué sirve cada suplemento?</div>
+    <div class="wh-sub">Resumen científico · por qué está en el stack y qué hace exactamente</div>
+  </div>
+  <div class="main">
+    <div class="info-grid">
+
+      <div class="info-card">
+        <div class="info-num">01</div>
+        <div class="info-name">Taurina</div>
+        <div class="info-for">Osmoregulación · Protección celular · Corazón</div>
+        <div class="info-body">El aminoácido libre más abundante en el músculo esquelético. No es un estimulante — es un arquitecto celular. En el corte de peso, actúa como osmoregulador: cuando las células pierden volumen por la deshidratación, la taurina mantiene su función contráctil. También neutraliza el ácido hipocloroso, uno de los oxidantes más dañinos del ejercicio intenso, y estabiliza el ritmo cardíaco durante cortes agresivos regulando el calcio intracelular en el miocardio. Está infravalorada porque no se siente — sus efectos son estructurales y protectores, invisibles hasta que faltan.</div>
+        <div class="info-dose">3g pre-11h (S3) → 4g pre-11h (S2) → 2g en descarga → 2g post-pesaje</div>
+        <div class="info-when">500 mg por cápsula · 6–8 cápsulas según fase</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">02</div>
+        <div class="info-name">Glicina</div>
+        <div class="info-for">Colágeno nocturno · Sueño profundo</div>
+        <div class="info-body">El aminoácido más abundante en el colágeno — representa el 33% de su estructura. Cuando se toma antes de dormir, el cuerpo la usa durante el sueño para reparar tendones, ligamentos y tejido conectivo. Shaw et al. (2017) demostró que acelera significativamente esta síntesis. Además, baja la temperatura corporal central ligeramente — que es exactamente la señal fisiológica que necesita el cuerpo para entrar en sueño profundo (Bannai et al., 2012). En polvo, sabor suave y dulce, se disuelve en cualquier líquido.</div>
+        <div class="info-dose">5g noche (S3) → 3g noche (S2 y descarga) → 5g noche anterior combate</div>
+        <div class="info-when">Polvo · media o una cucharadita antes de dormir</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">03</div>
+        <div class="info-name">L-Glutamina</div>
+        <div class="info-for">Intestino · Sistema inmune</div>
+        <div class="info-body">El intestino usa glutamina como combustible principal de sus células. Con 12 sesiones semanales, la barrera intestinal se vuelve permeable bajo déficit de glutamina — eso genera inflamación sistémica y peor absorción de nutrientes. Suplementar 3g post-entreno mantiene esa barrera íntegra. Las células del sistema inmune también la usan como combustible prioritario: los atletas en camp de alta densidad son más vulnerables a infecciones porque el sistema inmune compite con los músculos por la glutamina disponible. Se pausa en semana 2 porque aporta calorías que interfieren con el corte.</div>
+        <div class="info-dose">3g post-11h (S3) → pausada (S2 en adelante)</div>
+        <div class="info-when">Polvo · una medida post-entreno disuelta en agua</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">04</div>
+        <div class="info-name">L-Theanine</div>
+        <div class="info-for">Foco sin sobreactivación · Sueño profundo</div>
+        <div class="info-body">Tiene dos usos distintos. Pre-entreno: modula la activación mental modulando el GABA, dando foco limpio sin ansiedad ni crash — útil en la segunda sesión de las 19h cuando el SNC ya lleva una carga. Por la noche: activa los receptores GABA reduciendo la activación simpática nocturna, reduciendo el tiempo hasta el sueño profundo. Sin efecto de resaca, sin dependencia. En fight week la dosis sube a 450 mg la noche anterior al combate porque la activación nerviosa es máxima y el sueño es lo más crítico para el rendimiento del día siguiente.</div>
+        <div class="info-dose">150 mg pre-11h + 150 mg noche (S3 y S2) → 450 mg noche antes del combate</div>
+        <div class="info-when">150 mg por cápsula · 1 cápsula normal · 3 cápsulas noche antes combate</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">05</div>
+        <div class="info-name">Magnesium Bisglycinate</div>
+        <div class="info-for">Recuperación muscular · Sueño · Calambres</div>
+        <div class="info-body">Se pierde masivamente con el sudor en doble sesión. La deficiencia subclínica aumenta el riesgo de calambres, reduce la calidad del sueño y deteriora la recuperación muscular. El formato bisglicinato tiene ~80% de absorción frente al 4% del óxido — y no genera efecto laxante, lo que lo hace el único formato viable en fase de corte. Se reduce a 2 cápsulas en semana 2 precisamente para minimizar ese riesgo. En la noche anterior al combate sube de nuevo porque la calidad del sueño es crítica.</div>
+        <div class="info-dose">4 cápsulas noche (S3) → 2 cápsulas noche (S2) → 3 cápsulas noche antes combate</div>
+        <div class="info-when">120 mg elemental por cápsula</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">06</div>
+        <div class="info-name">Ashwagandha</div>
+        <div class="info-for">Cortisol · Recuperación del SNC · Testosterona</div>
+        <div class="info-body">Actúa sobre el eje HPA reduciendo el cortisol basal. Con 12 sesiones semanales, el cortisol crónico es uno de los mayores riesgos para la recuperación. Chandrasekhar et al. (2012) mostró una reducción del 28% del cortisol sérico con 600 mg/día de KSM-66. La dosis de Solgar es 400 mg por cápsula: 1 mañana + 1 noche = 800 mg/día, ligeramente por encima del estudio pero dentro del rango seguro. Se pausa en fight week porque puede generar somnolencia diurna que no se quiere el día antes o el día del combate.</div>
+        <div class="info-dose">1 cápsula mañana + 1 cápsula noche (S3 y S2) → pausada en fight week</div>
+        <div class="info-when">400 mg por cápsula · 2 cápsulas al día = 800 mg</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">07</div>
+        <div class="info-name">Creatina Creapure</div>
+        <div class="info-for">Potencia anaeróbica · Recuperación · Rehidratación post-pesaje</div>
+        <div class="info-body">El suplemento más estudiado en la historia del deporte. Recarga el sistema de fosfocreatina — el combustible de los esfuerzos explosivos de 1–10 segundos que dominan el MMA (derribos, series de golpes, transiciones). Retiene 0,5–1,5 litros de agua intracelular, por eso se pausa Se corta al inicio de fight week (15 días). Se reintroduce inmediatamente post-pesaje con carbohidratos porque la insulina maximiza la captación muscular y acelera la recarga de glucógeno. La forma Creapure es la más pura y estudiada del mercado.</div>
+        <div class="info-dose">5g diarios desde S3 día 1 (el atleta empieza ahora) → PAUSAR lunes de fight week → 5g inmediatamente post-pesaje</div>
+        <div class="info-when">Polvo · 1 medida = 5g · con la comida más alta en carbohidratos</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">08</div>
+        <div class="info-name">Omega-3 Fish Oil</div>
+        <div class="info-for">Antiinflamación sistémica · Membrana celular</div>
+        <div class="info-body">Con 12 sesiones semanales, la inflamación sistémica es continua. El EPA y el DHA actúan como antiinflamatorios de base reduciendo las prostaglandinas proinflamatorias. 2 softgels del Triple Strength aportan 1.008 mg de EPA + 756 mg de DHA, que está en el rango terapéutico validado para deportistas. Se pausa 3–5 días antes del combate porque tiene un leve efecto anticoagulante — no es peligroso, pero en un deporte de contacto es una precaución razonable. Se reintroduce inmediatamente post-pesaje.</div>
+        <div class="info-dose">2 softgels post-11h (S3 y S2) → pausado fight week → 2 softgels post-pesaje</div>
+        <div class="info-when">950 mg por softgel: 504 mg EPA + 378 mg DHA</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">09</div>
+        <div class="info-name">Male Multiple</div>
+        <div class="info-for">Base de micronutrientes · Vitamina C · Zinc · B12</div>
+        <div class="info-body">Cubre las deficiencias de micronutrientes que aparecen inevitablemente bajo volumen alto de entrenamiento y restricción calórica. Los 400 mg de vitamina C que aporta ya cubren las necesidades generales — no hace falta suplementar vitamina C extra. Incluye zinc, B12, B6 y otros cofactores críticos para la síntesis hormonal y la función neurológica. Se pausa los últimos 3 días de semana 2 porque en corte activo algunos de sus componentes pueden interferir con la diuresis natural, y se reintroduce inmediatamente post-pesaje.</div>
+        <div class="info-dose">3 tabletas con el desayuno · pausar días 5–7 de S2 · reintroducir post-pesaje</div>
+        <div class="info-when">3 tabletas = 1 dosis completa</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">10</div>
+        <div class="info-name">Vitamin D3</div>
+        <div class="info-for">Inmunidad · Testosterona · Hueso</div>
+        <div class="info-body">La deficiencia de vitamina D es extremadamente común en atletas que entrenan en interior. Actúa como hormona, no solo como vitamina: regula la expresión de más de 200 genes relacionados con la función inmune, la síntesis de testosterona y la absorción de calcio. 2.000 UI al día es la dosis de mantenimiento segura y eficaz para un atleta. Se toma con K2 MK-7 porque K2 dirige el calcio absorbido gracias a la D3 hacia los huesos y no hacia las arterias — son sinérgicos y deben tomarse juntos.</div>
+        <div class="info-dose">2 softgels cada mañana → 2.000 UI</div>
+        <div class="info-when">1.000 UI por softgel · 2 softgels = 2.000 UI</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">11</div>
+        <div class="info-name">Vitamin K2 MK-7</div>
+        <div class="info-for">Sinérgico con D3 · Salud ósea · Cardiovascular</div>
+        <div class="info-body">La K2 en formato MK-7 activa la proteína MGP (Matrix Gla Protein) que dirige el calcio absorbido por la D3 hacia los huesos y dientes, evitando que se deposite en las arterias. Sin K2, la D3 a dosis altas puede paradójicamente promover la calcificación arterial. Es el suplemento más sinérgico del stack: no funciona sin D3, y D3 sin K2 es incompleta. 100 mcg/día es la dosis estándar validada. El formato MK-7 tiene una vida media de 72 horas — es el más biodisponible y estable de todas las formas de K2.</div>
+        <div class="info-dose">1 cápsula cada mañana → 100 mcg</div>
+        <div class="info-when">100 mcg por cápsula · siempre con D3 y con grasa (desayuno)</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">12</div>
+        <div class="info-name">Zinc Picolinate</div>
+        <div class="info-for">Sistema inmune · Testosterona · Pérdidas por sudor</div>
+        <div class="info-body">El zinc se pierde significativamente con el sudor — y un atleta con 12 sesiones semanales suda cantidades considerables. La deficiencia subclínica de zinc reduce la síntesis de testosterona, deteriora la función inmune y ralentiza la cicatrización de pequeñas lesiones. El formato picolinato es el más biodisponible: el zinc se une al ácido picolínico, un quelante natural que facilita su absorción intestinal. 22 mg/día cubre el rango alto recomendado para atletas sin llegar a niveles que puedan interferir con la absorción de cobre.</div>
+        <div class="info-dose">1 tableta cada mañana → 22 mg</div>
+        <div class="info-when">22 mg por tableta · con comida para mejor tolerancia</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">13</div>
+        <div class="info-name">Sales Minerales</div>
+        <div class="info-for">Electrolitos · Rendimiento · Protocolo de corte</div>
+        <div class="info-body">En un contexto de doble sesión y corte de peso, las sales minerales no son un extra — son infraestructura de funcionamiento. En la fase de carga de agua (lunes–miércoles de fight week) se toman con sodio porque el sodio facilita la retención de agua. En la fase de descarga (últimas 48h) se eliminan del sodio y se toman solo potasio y magnesio porque sin sodio el cuerpo excreta agua más eficientemente. Post-pesaje, el sodio vuelve a ser lo primero porque sin él el agua que se beba no se absorbe correctamente — pasa sin retenerse.</div>
+        <div class="info-dose">Con sesiones de entrenamiento · protocolo específico en fight week</div>
+        <div class="info-when">Según el producto utilizado · clave: con sodio en carga · sin sodio en descarga</div>
+      </div>
+
+
+      <div class="info-card">
+        <div class="info-num">14</div>
+        <div class="info-name">Vitamina C 500 mg</div>
+        <div class="info-for">Síntesis de colágeno pre-entreno · Inmunidad</div>
+        <div class="info-body">El Male Multiple ya aporta 400 mg de vitamina C al día — eso cubre las necesidades generales. Pero Shaw et al. (2017) demostró que vitamina C + colágeno tomados 30–60 minutos <em>antes del entrenamiento</em> aumenta significativamente la síntesis de tejido conectivo durante el ejercicio. La vitamina C es cofactor de la prolil hidroxilasa, la enzima que estabiliza el colágeno. Sin ella activa en ese momento específico, la glicina nocturna construye colágeno menos estable. Esta dosis pre-entreno es distinta e independiente de la dosis general del día — actúa en la ventana de ejercicio, no como suplemento general.</div>
+        <div class="info-dose">500 mg · 30–45 min pre-11h · con la taurina y L-Theanine · todos los días de S4 y S3 · mantener en S2 y fight week</div>
+        <div class="info-when">1 cápsula Solgar Vitamin C 500 mg · mismo vaso que la taurina</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">15</div>
+        <div class="info-name">Colágeno Hidrolizado</div>
+        <div class="info-for">Tendones · Ligamentos · Tejido conectivo</div>
+        <div class="info-body">La glicina nocturna es el ladrillo. El colágeno hidrolizado pre-entrenamiento es el andamio completo. Lis et al. (2019) demostró que 15g de colágeno hidrolizado + vitamina C antes del entrenamiento aumenta los marcadores de síntesis de colágeno en ligamentos más del doble comparado con placebo. Para un peleador con 12 sesiones semanales — donde tendones del codo, muñeca, rodilla y tobillo acumulan estrés constante — esto es prevención estructural directa. El colágeno hidrolizado aporta los péptidos de colágeno tipo I y III en forma predigerida que el cuerpo puede usar directamente en el tejido conectivo. Se pausa en semana 2 porque aporta calorías que interfieren con el corte calórico.</div>
+        <div class="info-dose">15g polvo · 30–45 min pre-11h · con 500 mg Vit C · S4 y S3 completas · pausar desde S2</div>
+        <div class="info-when">Polvo hidrolizado tipo I/III · Thorne NSF o Vital Proteins · disolver en agua o zumo frío</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-num">16</div>
+        <div class="info-name">Beta-Alanina</div>
+        <div class="info-for">Rendimiento directo · Tampón de ácido láctico · Aguante en rounds</div>
+        <div class="info-body">El único suplemento del stack que mejora el rendimiento directo en combate. Actúa aumentando los niveles de carnosina muscular, que tampona el ácido láctico durante esfuerzos de alta intensidad de 1–4 minutos — exactamente la duración de un round de MMA. Hobson et al. (2012) en meta-análisis de 15 estudios: mejora significativa del rendimiento en ejercicios de 60–240 segundos. Con 26 días hasta el combate, empezar ahora da saturación parcial (~60–70% del máximo) — suficiente para notar diferencia en el tercer y cuarto round, que es cuando el lactato acumulado empieza a degradar la técnica. El picor en piel (parestesia) que aparece 15–20 min después es completamente normal, no es dañino y desaparece solo. No retiene agua — no interfiere con el corte.</div>
+        <div class="info-dose">3.2g/día divididos: 1.6g con desayuno + 1.6g con cena · todos los días hasta el combate · no pausar</div>
+        <div class="info-when">Polvo o cápsulas · NOW Foods Beta-Alanina o Carlson · 2 tomas de 1.6g para minimizar el picor</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-refs">
+    <strong>Referencias científicas</strong><br>
+    Shaw et al., Am J Clin Nutr (2017) · Bannai & Kawai, Front Neurol (2012) · Rio et al., BJSM (2015)<br>
+    Chandrasekhar et al., Indian J Psychol Med (2012) · Petersen et al., AJSM (2011)<br>
+    Kurtz et al., J Int Soc Sports Nutr (2021) · Deng et al., SJMSS (2025) · Hultman et al., J Appl Physiol (1996)<br>
+    ConsumerLab Glycine Review (2025) · Sigma Nutrition — Making Weight (2023)<br>
+    Lis et al., Nutrients (2019) · Hobson et al., Amino Acids (2012) · Shaw et al., Am J Clin Nutr (2017)
+  </div>
+  <div class="foot-note">
+    72 kg → 63 kg · +24h post-pesaje<br>
+    3 semanas y 5 días hasta el combate<br>
+    Suplementación basada en evidencia científica
+  </div>
+</footer>
+
+<script>
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  const map = {s4:0, s3:1, s2:2, fw:3, info:4};
+  const tabs = document.querySelectorAll('.ntab');
+  if (tabs[map[id]]) tabs[map[id]].classList.add('active');
+}
+
+function showDay(week, day) {
+  // hide all day-content in this week
+  const view = document.getElementById('view-' + week);
+  view.querySelectorAll('.day-content').forEach(d => d.classList.remove('dactive'));
+  view.querySelectorAll('.dtab').forEach(t => t.classList.remove('dactive'));
+  const target = document.getElementById(week + '-' + day);
+  if (target) target.classList.add('dactive');
+  event.target.classList.add('dactive');
+}
+</script>
+</body>
+</html>
